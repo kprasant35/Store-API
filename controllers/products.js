@@ -6,8 +6,8 @@ const getAllProductsStatic = async(req,res)=>{
 }
 
 const getAllProducts = async(req,res)=>{
-    console.log(req.query);
-    const {featured, name, company, rating, sort, fields} = req.query; // this is done for filtering only those query which we can process.
+    
+    const {featured, name, company, rating, sort, fields, offset, limit} = req.query; // this is done for filtering only those query which we can process.
     const queryObject = {};
 
     if(featured){
@@ -29,12 +29,23 @@ const getAllProducts = async(req,res)=>{
         const sortList = sort.split(',').join(' '); // join because mongoDB accept paramters seperated by spaces .sort(name rating);
         result.sort(sortList);
     }else{
-        result.sortList('createdAt');
+        result.sort('createdAt')
     }
 
     if(fields){
         const fieldList = fields.split(',').join(' '); // join because mongoDB accept paramters seperated by spaces .select(name rating);
         result.select(fieldList);
+    }
+
+    if(offset){
+        const skip = Number(offset);
+        result.skip(skip);
+    }
+
+    if(limit){
+        result.limit(Math.min(10,Number(limit)));
+    }else{
+        result.limit(10);
     }
 
     const products = await result;
